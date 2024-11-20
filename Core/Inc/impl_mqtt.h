@@ -9,6 +9,7 @@
 #include "MQTTFormat.h"
 #include "MQTTUnsubscribe.h"
 #include "socket.h"
+#include "string.h"
 #include "impl_mqtt.h" // 确保包含正确的头文件
 
 // 全局变量声明
