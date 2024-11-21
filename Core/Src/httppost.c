@@ -82,14 +82,14 @@ uint8_t func_http_post(uint8_t sock_no, uint8_t *rip, uint16_t port, char *buf_p
 						buf_recv[len] = '\0';
 						*len_recv = len;
 						// 关闭socket
-						close(sock_no);
+						close1(sock_no);
 						return 0;
 					}					
 				}				
 			break;
 			case SOCK_CLOSE_WAIT:
 				// 关闭socket
-				close(sock_no);
+				close1(sock_no);
 			break;
 			case SOCK_CLOSED:
 				// 创建socket
@@ -107,7 +107,7 @@ uint8_t func_http_post(uint8_t sock_no, uint8_t *rip, uint16_t port, char *buf_p
 		// 如果计数器超过超时时间，关闭socket并返回错误
 		if(cnt >= timeout_ms)
 		{
-			close(sock_no);
+			close1(sock_no);
 			return 1;
 		}
 		// 延时1ms

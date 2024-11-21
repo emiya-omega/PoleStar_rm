@@ -77,7 +77,6 @@ int main()
 
   /* USER CODE BEGIN 1 */
 	uint8_t res;
-  printf("Hello World!\r\n");
 
   /* USER CODE END 1 */
 

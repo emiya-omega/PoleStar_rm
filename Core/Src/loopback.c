@@ -42,7 +42,7 @@ int32_t loopback_tcps(uint8_t sn, uint8_t* buf, uint16_t port)
 				ret = send(sn, buf+sentsize, size-sentsize);
 				if(ret < 0)
 				{
-					close(sn);
+					close1(sn);
 					return ret;
 				}
 				sentsize += ret; // Don't care SOCKERR_BUSY, because it is zero.
@@ -125,7 +125,7 @@ int32_t loopback_tcpc(uint8_t sn, uint8_t* buf, uint8_t* destip, uint16_t destpo
 				ret = send(sn, buf+sentsize, size-sentsize); // Data send process (User's buffer -> Destination through H/W Tx socket buffer)
 				if(ret < 0) // Send Error occurred (sent data length < 0)
 				{
-					close(sn); // socket close
+					close1(sn); // socket close
 					return ret;
 				}
 				sentsize += ret; // Don't care SOCKERR_BUSY, because it is zero.
@@ -152,7 +152,7 @@ int32_t loopback_tcpc(uint8_t sn, uint8_t* buf, uint8_t* destip, uint16_t destpo
          break;
 
       case SOCK_CLOSED:
-    	  close(sn);
+    	  close1(sn);
     	  if((ret=socket(sn, Sn_MR_TCP, any_port++, 0x00)) != sn){
          if(any_port == 0xffff) any_port = 50000;
          return ret; // TCP socket open with 'any_port' port number
