@@ -10,6 +10,8 @@
 #include "MQTTUnsubscribe.h"
 #include "socket.h"
 #include "string.h"
+#include <stdbool.h>
+#include "cJSON.h"
 #include "impl_mqtt.h" // 确保包含正确的头文件
 
 // 全局变量声明
@@ -18,7 +20,8 @@ extern int cnt_ping_not_response;
 extern int cnt_sock_init;
 extern uint8_t buf_pub[1024];
 extern uint32_t ping_timestamp, now_timestamp;
-enum MQTT_STATE {MQTT_INIT, MQTT_CONNOK, MQTT_SUBOK};
+enum MQTT_STATE {MQTT_INIT, MQTT_CONNOK, MQTT_SUBOK};//MQTT_INIT - 初始状态（MQTT未连接，未订阅，注意是MQTT的，而不是TCP连接了没有） MQTT_CONNOK - MQTT连接成功(MQTT Client端发起MQTT连接，并接收到了broker返回连接成功)MQTT_SUBOK - MQTT订阅成功（MQTT Client端想broker订阅消息，并受到了broker返回订阅成功）
+
 
 
 // 函数声明

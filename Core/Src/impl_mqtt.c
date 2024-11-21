@@ -75,7 +75,48 @@ uint8_t func_judge_mqtt_recvmsg_package_type(uint8_t *buf_mqrecv, uint16_t len_m
 	// 否则返回0
 	return 0;
 }
- 
+const char* DEVICE_ID = "1848720087759065088";
+
+void handle_request_and_publish_response(uint8_t sockno, const char* request_topic, const char* response_topic, const uint8_t* payload, int payloadlen) {
+    // 解析请求的JSON数据
+    cJSON* root = cJSON_Parse((const char*)payload);
+    if (root == NULL) {
+         printf("JSON解析失败，处理错误");
+        return;
+    }
+
+    // 提取字段
+    cJSON* requestId = cJSON_GetObjectItemCaseSensitive(root, "requestId");
+    cJSON* data = cJSON_GetObjectItemCaseSensitive(root, "data");
+
+    // TODO: 根据data中的type和working字段进行相应的操作
+
+    // 构造响应的JSON数据
+    cJSON* responseRoot = cJSON_CreateObject();
+    cJSON_AddStringToObject(responseRoot, "id", DEVICE_ID);
+    if (requestId != NULL && requestId->type == cJSON_String) {
+        cJSON_AddStringToObject(responseRoot, "requestId", requestId->valuestring);
+    }
+    cJSON_AddBoolToObject(responseRoot, "success", true); // 假设操作成功
+
+    // 序列化响应的JSON数据
+    char* responseStr = cJSON_PrintUnformatted(responseRoot);
+    if (responseStr == NULL) {
+         printf("JSON序列化失败，处理错误");
+        cJSON_Delete(responseRoot);
+        return;
+    }
+
+    // 发布响应消息
+    MQTTString topicpub;
+    topicpub.cstring = (char*)response_topic;
+    func_run_mqtt_publish(sockno, buf_pub, sizeof(buf_pub), topicpub, (uint8_t*)responseStr, strlen(responseStr));
+
+    // 清理
+    cJSON_Delete(responseRoot);
+    cJSON_free(responseStr);
+}
+
 void func_mqtt_client_dealwith_recvmsg(uint8_t sockno, uint8_t *buf_mqrecv, uint16_t len_mqbuf, uint16_t len_mqrecv)
 {
 	// 如果接收到的消息长度大于0
@@ -106,10 +147,52 @@ void func_mqtt_client_dealwith_recvmsg(uint8_t sockno, uint8_t *buf_mqrecv, uint
 				{
 					//TODO ...
 					//TEST code
-					topicpub.cstring = (char*)"mytopic";
-					memset(buf_pub, 0, sizeof(buf_pub));
-					// 发布消息
-					func_run_mqtt_publish(sockno, buf_pub, sizeof(buf_pub), topicpub, payload, len_payload);
+					if (strcmp(topicrecv.cstring, "clock/work/request") == 0) 
+							{
+								//TODO ...
+								//TEST code
+								//topicpub.cstring = (char*)"clock/work/response";
+								printf("clock/work/request");
+								handle_request_and_publish_response(sockno, topicrecv.cstring, "clock/work/response", payload, len_payload);
+
+							}
+
+					else if (strcmp(topicrecv.cstring, "clock/changeTime/request") == 0){
+						//TODO ...
+						//TEST code
+						//topicpub.cstring = (char*)"clock/changeTime/response";
+						       handle_request_and_publish_response(sockno, topicrecv.cstring, "clock/changeTime/response", payload, len_payload);
+
+					}
+					else if (strcmp(topicrecv.cstring, "clock/changeSection/request") == 0){
+						//TODO ...
+						//TEST code
+						//topicpub.cstring = (char*)"clock/changeSection/response";
+						     handle_request_and_publish_response(sockno, topicrecv.cstring, "clock/changeSection/response", payload, len_payload);
+
+					    
+					}
+					else if (strcmp(topicrecv.cstring, "clock/clock/request") == 0){
+					    
+						//TODO ...
+						//TEST code
+						//topicpub.cstring = (char*)"clock/clock/response";
+						 handle_request_and_publish_response(sockno, topicrecv.cstring, "clock/clock/response", payload, len_payload);
+
+					}
+					else if (strcmp(topicrecv.cstring, "clock/tellTime/request") == 0){
+					    
+						//TODO ...
+						//TEST code
+						//topicpub.cstring = (char*)"clock/tellTime/response";
+                        handle_request_and_publish_response(sockno, topicrecv.cstring, "clock/tellTime/response", payload, len_payload);
+
+					}
+					
+					//topicpub.cstring = (char*)"mytopic";
+					//memset(buf_pub, 0, sizeof(buf_pub));
+					// 发布消息d
+					//func_run_mqtt_publish(sockno, buf_pub, sizeof(buf_pub), topicpub, payload, len_payload);
 				}
 			}			
 			break;
