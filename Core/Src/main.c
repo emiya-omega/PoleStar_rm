@@ -114,14 +114,14 @@ int main()
 	// 定义MQTT代理端口
 	uint16_t port_broker = 1883;
 	// 定义MQTT发送缓冲区``````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````〔筆畫〕〔筆畫〕`
-	uint8_t buf_mqtt_send[256];
+	uint8_t buf_mqtt_send[1024];
 	// 定义MAC地址
 	uint8_t mac[6]={0x78, 0x83, 0x68, 0x88, 0x56, 0x72 };
 	// 定义MQTT状态
 	int mqtt_stat;
 	
 	// 定义MQTT订阅主题
-	MQTTString sub_topic = MQTTString_initializer;
+	MQTTString sub_topic  = MQTTString_initializer;
 	MQTTString sub_topic2 = MQTTString_initializer;
 	MQTTString sub_topic3 = MQTTString_initializer;
 	MQTTString sub_topic4 = MQTTString_initializer;
@@ -177,6 +177,8 @@ int main()
 		}
     
 	}
+  				memset(buf_mqtt_send, 0, sizeof(buf_mqtt_send));
+
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -186,12 +188,29 @@ int main()
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-     do_tcpc();//TCP客户端处理函数
-    	mqtt_stat = func_run_mqtt_tcpsock(2, ip_broker, port_broker, buf_mqtt_send, sizeof(buf_mqtt_send), &conn_mqtt);
+    // do_tcpc();//TCP客户端处理函数
+    mqtt_stat = func_run_mqtt_tcpsock(2, ip_broker, port_broker, buf_mqtt_send, sizeof(buf_mqtt_send), &conn_mqtt);
+		if(mqtt_stat >= MQTT_CONNOK)
+		{
+			if(mqtt_stat == MQTT_CONNOK)
+			{
+				memset(buf_mqtt_send, 0, sizeof(buf_mqtt_send));
+				func_mqtt_client_subtopic_from_broker(2, buf_mqtt_send, sizeof(buf_mqtt_send), 4,	sub_topics, nums_sub_topic_qoss);
+ 
+			}
+			
+		}		
+		HAL_Delay(500);
+
+/**   	mqtt_stat = func_run_mqtt_tcpsock(2, ip_broker, port_broker, buf_mqtt_send, sizeof(buf_mqtt_send), &conn_mqtt);
+      		memset(buf_mqtt_send, 0, sizeof(buf_mqtt_send));
 		// 调用func_run_mqtt_tcpsock函数，参数为2，ip_broker，port_broker，buf_mqtt_send，sizeof(buf_mqtt_send)，conn_mqtt，返回mqtt_stat
 		if(mqtt_stat >= MQTT_CONNOK)
 		{
+     // func_mqtt_client_recvmsg_from_broker(2, buf_mqtt_send, sizeof(buf_mqtt_send));
+       // func_mqtt_client_ping_broker(&mqtt_stat, 2, buf_mqtt_send, sizeof(buf_mqtt_send));
 			// 如果mqtt_stat等于MQTT_CONNOK，则执行以下代码
+
 			if(mqtt_stat == MQTT_CONNOK)
 			{
 				// 如果mqtt_stat等于MQTT_CONNOK，则执行以下代码
@@ -202,7 +221,7 @@ int main()
 				// 调用func_mqtt_client_subtopic_from_broker函数，参数为2，buf_mqtt_send，sizeof(buf_mqtt_send)，4，sub_topics，nums_sub_topic_qoss
 			}
 
-		}	
+		}	*/
   }
   /* USER CODE END 3 */
 }

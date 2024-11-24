@@ -86,4 +86,7 @@ uint8_t func_run_mqtt_tcpsock(uint8_t sockno, uint8_t *broker_ip, uint16_t broke
 // 返回值：uint8_t
 uint8_t func_run_mqtt_progress(int state, uint8_t sockno, uint8_t *buf_mqsend, uint16_t len_mqsend, MQTTPacket_connectData *conn_mqtt);
 
+void handle_request_and_publish_response(uint8_t sockno, const char *request_topic, const char *response_topic, const uint8_t *payload, int payloadlen);
+
+
 #endif // __IMPL_MQTT_H
