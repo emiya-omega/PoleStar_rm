@@ -28,11 +28,7 @@ extern "C" {
 
 /* Includes ------------------------------------------------------------------*/
 #include "stm32f1xx_hal.h"
-#include "w5100s_port_hal.h"
-#include "dns.h"
-#include "dhcp.h"
-#include "impl_mqtt.h"
-#include <string.h>
+#include "main.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
@@ -62,6 +58,16 @@ void Error_Handler(void);
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/
+#define XMT_Pin GPIO_PIN_12
+#define XMT_GPIO_Port GPIOF
+#define DMP_Pin GPIO_PIN_13
+#define DMP_GPIO_Port GPIOF
+#define FMT_Pin GPIO_PIN_14
+#define FMT_GPIO_Port GPIOF
+#define FLT_Pin GPIO_PIN_0
+#define FLT_GPIO_Port GPIOG
+#define Relay_IN_Pin GPIO_PIN_2
+#define Relay_IN_GPIO_Port GPIOG
 
 /* USER CODE BEGIN Private defines */
 

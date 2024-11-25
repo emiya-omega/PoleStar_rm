@@ -55,7 +55,6 @@ void func_judge_timeout_ms(uint32_t *timespan)
 	*timespan = *timespan + 1;
 }
 
-
 // 函数：判断mqtt接收到的消息包类型
 // 参数：buf_mqrecv：mqtt接收到的消息包
 //       len_mqrecv：mqtt接收到的消息包长度
@@ -181,57 +180,130 @@ void func_mqtt_client_dealwith_recvmsg(uint8_t sockno, uint8_t *buf_mqrecv, uint
 				cJSON *data = cJSON_GetObjectItemCaseSensitive(root, "data");
 				if (strcmp(mode->valuestring, "work") == 0)
 				{
+					if (data != NULL && cJSON_IsObject(data))
+					{
+						cJSON *type = cJSON_GetObjectItemCaseSensitive(data, "type");
+						cJSON *working = cJSON_GetObjectItemCaseSensitive(data, "working");
 
+						if (type != NULL && cJSON_IsString(type) && working != NULL && cJSON_IsString(working))
+						{
+
+							// 示例逻辑：根据type和working的值进行操作
+							if (strcmp(type->valuestring, "0") == 0) // 钟表
+							{
+								if (strcmp(working->valuestring, "0") == 0) // 停止
+								{
+									// 处理钟表停止的逻辑
+									printf("Handling clock stop\n");
+								}
+								else if (strcmp(working->valuestring, "1") == 0) // 运行
+								{
+									// 处理钟表运行的逻辑
+									printf("Handling clock run\n");
+								}
+							}
+							else if (strcmp(type->valuestring, "1") == 0) // 扩大机
+							{
+								if (strcmp(working->valuestring, "0") == 0) // 停止
+								{
+									// 处理扩大机停止的逻辑(音频静音)
+									HAL_GPIO_WritePin(GPIOF, XMT_Pin, GPIO_PIN_SET);
+									printf("Handling amplifier stop\n");
+								}
+								else if (strcmp(working->valuestring, "1") == 0) // 运行
+								{
+									// 处理扩大机运行的逻辑（静音解除）
+									HAL_GPIO_WritePin(GPIOF, XMT_Pin, GPIO_PIN_RESET);
+									printf("Handling amplifier run\n");
+								}
+							}
+							else if (strcmp(type->valuestring, "2") == 0) // 灯光
+							{
+								if (strcmp(working->valuestring, "0") == 0) // 停止
+								{
+									// 处理灯光停止的逻辑（继电器断）
+									HAL_GPIO_WritePin(Relay_IN_GPIO_Port, Relay_IN_Pin, GPIO_PIN_SET);
+									printf("Handling light stop\n");
+								}
+								else if (strcmp(working->valuestring, "1") == 0) // 运行
+								{
+									// 处理灯光运行的逻辑（继电器通）
+									HAL_GPIO_WritePin(Relay_IN_GPIO_Port, Relay_IN_Pin, GPIO_PIN_RESET);
+									printf("Handling light run\n");
+								}
+							}
+						}
+					}
 					topicpub.cstring = (char *)"clock/work/response";
-
 				}
 				else if (strcmp(mode->valuestring, "clock") == 0)
 				{
-
+					uint8_t batteryVoltage; // 电池电压
+					uint8_t clockTemperature; // 设备温度
+					uint8_t workingVoltage;   // 工作电压
+					uint8_t workingCurrent;   // 工作电流
+					uint8_t workingDays;      // 运行天数
+					uint8_t hardwareVersion;  // 硬件版本
+					uint8_t softwareVersion;  // 软件版本
+					uint8_t longitude;        // 经度
+					uint8_t latitude;         // 纬度
+					// 处理 clock 模式的逻辑
+            		// TODO: 获取设备状态信息，例如电池电压、设备温度等
+					printf("Handling clock mode\n");
 					topicpub.cstring = (char *)"clock/clock/response";
-
 				}
 				else if (strcmp(mode->valuestring, "changeTime") == 0)
 				{
 
 					topicpub.cstring = (char *)"clock/changeTime/response";
-
 				}
 				else if (strcmp(mode->valuestring, "changeSection") == 0)
 				{
 
 					topicpub.cstring = (char *)"clock/changeSection/response";
-
 				}
 
-	cJSON *responseRoot = cJSON_CreateObject();
-	cJSON_AddStringToObject(responseRoot, "id", DEVICE_ID);
-	if (requestId != NULL && requestId->type == cJSON_String)
-	{
-		cJSON_AddStringToObject(responseRoot, "requestId", requestId->valuestring);
-	}
-	cJSON_AddBoolToObject(responseRoot, "success", true); // 假设操作成功
+				cJSON *responseRoot = cJSON_CreateObject();
+				cJSON_AddStringToObject(responseRoot, "id", DEVICE_ID);
+				if (requestId != NULL && requestId->type == cJSON_String)
+				{
+					cJSON_AddStringToObject(responseRoot, "requestId", requestId->valuestring);
+				}
+				cJSON_AddBoolToObject(responseRoot, "success", true); // 假设操作成功
+				if (strcmp(mode->valuestring, "clock") == 0)
+				{
+					cJSON *dataObj = cJSON_AddObjectToObject(responseRoot, "data");
+					cJSON_AddStringToObject(dataObj, "batteryVoltage", "获取的电池电压");
+					cJSON_AddStringToObject(dataObj, "clockTemperature", "获取的设备温度");
+					cJSON_AddStringToObject(dataObj, "workingVoltage", "获取的工作电压");
+					cJSON_AddStringToObject(dataObj, "workingCurrent", "获取的工作电流");
+					cJSON_AddStringToObject(dataObj, "workingDays", "获取的运行天数");
+					cJSON_AddStringToObject(dataObj, "hardwareVersion", "获取的硬件版本");
+					cJSON_AddStringToObject(dataObj, "softwareVersion", "获取的软件版本");
+					cJSON_AddStringToObject(dataObj, "longitude", "获取的经度");
+					cJSON_AddStringToObject(dataObj, "latitude", "获取的纬度");
+				}
 
-	// 序列化响应的JSON数据
-	char *responseStr = cJSON_PrintUnformatted(responseRoot);
-	if (responseStr == NULL)
-	{
-		printf("JSON序列化失败，处理错误");
-		cJSON_Delete(responseRoot);
-		return;
-	}
-	// 发布消息				
-	memset(buf_pub, 0, sizeof(buf_pub));
-								memset(buf_mqrecv, 0, len_mqbuf);
-				 
-								func_run_mqtt_publish(sockno, buf_pub, sizeof(buf_pub), topicpub, responseStr, strlen(responseStr));
-							
-                len_mqrecv = 0;
-			cJSON_free(responseStr);							// 清理
-	cJSON_Delete(responseRoot);
+				// 序列化响应的JSON数据
+				char *responseStr = cJSON_PrintUnformatted(responseRoot);
+				if (responseStr == NULL)
+				{
+					printf("JSON序列化失败，处理错误");
+					cJSON_Delete(responseRoot);
+					return;
+				}
+				// 发布消息
+				memset(buf_pub, 0, sizeof(buf_pub));
+				memset(buf_mqrecv, 0, len_mqbuf);
+
+				func_run_mqtt_publish(sockno, buf_pub, sizeof(buf_pub), topicpub, responseStr, strlen(responseStr));
+
+				len_mqrecv = 0;
+				cJSON_free(responseStr); // 清理
+				cJSON_Delete(responseRoot);
 
 				//  发布消息d
-				//func_run_mqtt_publish(sockno, buf_pub, sizeof(buf_pub), topicpub, payload, len_payload);
+				// func_run_mqtt_publish(sockno, buf_pub, sizeof(buf_pub), topicpub, payload, len_payload);
 			}
 		}
 		break;
@@ -272,7 +344,7 @@ void func_mqtt_client_dealwith_recvmsg(uint8_t sockno, uint8_t *buf_mqrecv, uint
 void func_mqtt_client_connect_broker(int *state, uint8_t sockno, uint8_t *buf_mqsend, uint16_t len_mqsend, MQTTPacket_connectData *conn_mqtt)
 {
 	// 定义变量timespan，len_cont，res
-	uint32_t timespan;                  
+	uint32_t timespan;
 	int len_cont;
 	int res;
 	// 调用MQTTSerialize_connect函数，将conn_mqtt中的数据序列化到buf_mqsend中，返回序列化后的数据长度

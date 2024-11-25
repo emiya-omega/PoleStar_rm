@@ -1,6 +1,8 @@
 #ifndef __IMPL_MQTT_H
 #define __IMPL_MQTT_H
 #include "stm32f1xx.h"
+#include "main.h"
+#include "stm32f1xx_hal.h"
 #include "MQTTClient.h"
 #include "MQTTConnect.h"
 #include "MQTTSubscribe.h"

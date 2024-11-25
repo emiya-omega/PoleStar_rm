@@ -25,14 +25,16 @@
 #include "spi.h"
 #include "usart.h"
 #include "gpio.h"
-#include <stdio.h>
-#include <string.h>
-#include <stdlib.h>
-#include  <errno.h>
-#include  <sys/unistd.h>
+
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+#include "stdio.h"
+#include "string.h"
+#include "stdlib.h"
+#include "errno.h"
+#include "ff.h"
+#include "sys/unistd.h"
+#include "impl_mqtt.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -72,7 +74,7 @@ void SystemClock_Config(void);
   * @brief  The application entry point.
   * @retval int
   */
-int main()
+int main(void)
 {
 
   /* USER CODE BEGIN 1 */
